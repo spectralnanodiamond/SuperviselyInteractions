@@ -1,5 +1,3 @@
-WORKSPACE_ID = 83434
-
 import supervisely_lib as sly
 import json
 import requests
@@ -9,24 +7,28 @@ from PIL import Image
 import os
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
-# Initialize API access with your token and server address
-# api = sly.Api('http://<your-supervisely-instance>', '<your-token>')
-#Following the description here:
-#https://developer.supervisely.com/getting-started/basics-of-authentication
-load_dotenv(os.path.expanduser("~/supervisely.env"))
-#address = "https://app.supervise.ly/"
-#token = os.environ["API_TOKEN"]
-api = sly.Api.from_env()
-#api = sly.Api(address, token)
-# Specify the project to download
-# project = api.project.get_info_by_name('<your-team>', '<your-project>')
-print(1)
-project = api.project.get_or_create(
-    workspace_id=WORKSPACE_ID, name="plast_data"
-)
 import numpy as np
 import cv2, zlib, base64, io
 from PIL import Image
+
+#Following the description here:
+#https://developer.supervisely.com/getting-started/basics-of-authentication
+#I have my webaddress and token stored in a .env file in my home directory
+load_dotenv(os.path.expanduser("~/supervisely.env"))
+api = sly.Api.from_env()
+
+# Alternatively, you can specify the address and token manually
+#address = "https://app.supervise.ly/"
+#token = os.environ["API_TOKEN"]
+#api = sly.Api(address, token)
+
+# Specify the project to download
+# project = api.project.get_info_by_name('<your-team>', '<your-project>')
+
+WORKSPACE_ID = 83434
+project = api.project.get_or_create(
+    workspace_id=WORKSPACE_ID, name="plast_data"
+)
 
 def base64_2_mask(s):
     z = zlib.decompress(base64.b64decode(s))
@@ -44,6 +46,7 @@ def mask_2_base64(mask):
 
 
 out_dir = "data/annotated"
+os.makedirs(out_dir)
 # Download images and annotations
 for dataset in api.dataset.get_list(project.id):
     for image in api.image.get_list(dataset.id):
@@ -57,10 +60,12 @@ for dataset in api.dataset.get_list(project.id):
             # ann["objects"][0]["bitmap"]
             # ann["objects"][0]["bitmap"]["data"]
             img = api.image.download_np(image.id)
+            np.save('here.npy', img)
             mask = base64_2_mask(ann["objects"][0]["bitmap"]["data"])
 #            name = "20230216/NMuMG-mut218_5um_20230213_useless/t=104_z=0_c=1"
 #            api.image.get_info_by_name(dataset.id,name=name).id
-            # plt.imshow(mask)
+
+            break
 
 
         # Save the image
