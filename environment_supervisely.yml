@@ -1,0 +1,21 @@
+# conda version 23.7.4
+# mamba version 1.5.1
+name: supervisely
+channels:
+#  - defaults
+  - conda-forge
+  - anaconda
+dependencies:
+  - python=3.11.5
+  - pip=23.2.1
+  - pillow=9.5.0
+  - pybase64=1.3.0
+  - requests=2.31.0
+  - numpy=1.26.0
+  - matplotlib=3.8.0
+  - napari=0.4.18
+  - pyqt=5.15.9
+  - opencv=4.8.0
+  - pip:
+      - supervisely==6.72.134
+#prefix: /nfs/users/nfs_b/bw17/.conda/envs/supervisely
