@@ -45,8 +45,8 @@ def mask_2_base64(mask):
     return base64.b64encode(zlib.compress(bytes)).decode('utf-8')
 
 
-out_dir = "data/annotated"
-os.makedirs(out_dir)
+out_dir = "data/annotated/"
+os.makedirs(out_dir, exist_ok=True)
 # Download images and annotations
 for dataset in api.dataset.get_list(project.id):
     for image in api.image.get_list(dataset.id):
@@ -60,8 +60,16 @@ for dataset in api.dataset.get_list(project.id):
             # ann["objects"][0]["bitmap"]
             # ann["objects"][0]["bitmap"]["data"]
             img = api.image.download_np(image.id)
-            np.save('here.npy', img)
+            img_name = 'imageId_' + str(image_id)
+            np.save(out_dir + img_name + '.npy', img)
+            origin_coords = 'x0_' + str(ann['objects'][0]['bitmap']['origin'][0])
+            origin_coords += '_x1_' + str(ann['objects'][0]['bitmap']['origin'][1])
+            object_id = str(ann['objects'][0]['id'])
             mask = base64_2_mask(ann["objects"][0]["bitmap"]["data"])
+            object_name = img_name
+            object_name += '_objectId_' + object_id
+            object_name += '_origin_' + origin_coords
+            np.save(out_dir + object_name + '.npy', mask)
 #            name = "20230216/NMuMG-mut218_5um_20230213_useless/t=104_z=0_c=1"
 #            api.image.get_info_by_name(dataset.id,name=name).id
 
