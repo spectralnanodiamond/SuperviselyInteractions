@@ -163,5 +163,7 @@ cython_debug/
 *.DS_Store
 
 # Removing the data/annotated folder from github
-data/annotated/
-data/annotated_metadata.csv
+data/annotated_images/
+data/annotated_objects/
+data/annotated_images_metadata.csv
+data/annotated_objects_metadata.csv
