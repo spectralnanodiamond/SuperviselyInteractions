@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import numpy as np
 import cv2, zlib, base64, io
 from PIL import Image
+import tifffile
+import csv
 
 #Following the description here:
 #https://developer.supervisely.com/getting-started/basics-of-authentication
@@ -45,62 +47,35 @@ def mask_2_base64(mask):
     return base64.b64encode(zlib.compress(bytes)).decode('utf-8')
 
 
+# Download images and annotations
 out_dir = "data/annotated/"
 os.makedirs(out_dir, exist_ok=True)
-# Download images and annotations
+dict_id_to_orignal_filename = {}
+
 for dataset in api.dataset.get_list(project.id):
     for image in api.image.get_list(dataset.id):
         image_id = image.id
-#        image_id = 291426010
         ann = api.annotation.download(image.id).annotation
         # img = api.image.download_np(image.id)
         
         if ann["objects"] != []:
-            print(ann)
-            # ann["objects"][0]["bitmap"]
-            # ann["objects"][0]["bitmap"]["data"]
             img = api.image.download_np(image.id)
-            img_name = 'imageId_' + str(image_id)
-            np.save(out_dir + img_name + '.npy', img)
+            dict_id_to_orignal_filename[image_id] = image.name
+            img_output_filename = 'imageId_' + str(image_id)
+            np.save(out_dir + img_output_filename + '.npy', img)
+            #could also use tifffile.imwrite('output.tiff', img) here
+
             origin_coords = 'x0_' + str(ann['objects'][0]['bitmap']['origin'][0])
             origin_coords += '_x1_' + str(ann['objects'][0]['bitmap']['origin'][1])
             object_id = str(ann['objects'][0]['id'])
             mask = base64_2_mask(ann["objects"][0]["bitmap"]["data"])
-            object_name = img_name
+            object_name = img_output_filename
             object_name += '_objectId_' + object_id
             object_name += '_origin_' + origin_coords
             np.save(out_dir + object_name + '.npy', mask)
-#            name = "20230216/NMuMG-mut218_5um_20230213_useless/t=104_z=0_c=1"
-#            api.image.get_info_by_name(dataset.id,name=name).id
 
-            break
-
-
-        # Save the image
-        # Image.fromarray(img).save(f'{image.name}.jpg')
-        # Save the image
-        # image_path = os.path.join(out_dir, f'{image.name}.tif')
-        # Image.fromarray(img).save(image_path)
-
-        # Convert the annotation to a mask and save it
-        # mask = convert_ann_to_mask(ann)  # Implement this function based on your requirements
-        # mask_path = os.path.join(out_dir, f'{image.name}_masks.tif')
-        # Image.fromarray(mask).save(mask_path)
-        # Convert the annotation to COCO format and save it
-        # coco_ann = convert_to_coco(ann)  # Implement this function based on your requirements
-        # with open(f'{image.name}.json', 'w') as f:
-            # json.dump(coco_ann, f)
-
-# # Now, you can use the COCO dataset loader from PyTorch to load the data
-# coco_data = datasets.CocoDetection(
-#     root='.',  # Specify the root directory where your images and annotations are saved
-#     annFile='.',  # Specify the directory where your annotations are saved
-#     transform=transforms.ToTensor(),
-# )
-
-# # Create a DataLoader
-# data_loader = DataLoader(coco_data, batch_size=32, shuffle=True)
-
-## download data
-#img = api.image.download_np(image_info.id)
-##ann = api.annotation.download_json(image_info.id)
+out_metadata = "data/"
+with open(out_metadata + 'annotated_metadata.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(['image_id', 'original_filename'])
+    writer.writerows(dict_id_to_orignal_filename.items())
