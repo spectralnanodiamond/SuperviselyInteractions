@@ -163,4 +163,4 @@ cython_debug/
 *.DS_Store
 
 # Removing the data from github
-#data/annotations/
+data/annotations/
