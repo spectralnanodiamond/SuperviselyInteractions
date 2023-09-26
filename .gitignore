@@ -162,5 +162,5 @@ cython_debug/
 # Mac
 *.DS_Store
 
-# Removing the data from github
+# Removing the data/annotated folder from github
 data/annotated/
