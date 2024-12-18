@@ -4,7 +4,7 @@ name: supervisely
 channels:
 #  - defaults
   - conda-forge
-  - anaconda
+#  - anaconda
 dependencies:
   - python
   - pip
